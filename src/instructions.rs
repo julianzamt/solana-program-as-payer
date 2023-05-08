@@ -4,6 +4,7 @@ use solana_program::{msg, program_error::ProgramError};
 #[derive(Debug)]
 pub enum ProgramAsPayerInstruction {
     CreateNotPDA {},
+    CreatePDA {},
 }
 
 impl ProgramAsPayerInstruction {
@@ -16,6 +17,7 @@ impl ProgramAsPayerInstruction {
 
         Ok(match tag {
             0 => Self::CreateNotPDA {},
+            1 => Self::CreatePDA {},
             _ => return Err(errors::ProgramAsPayerError::InvalidInstruction.into()),
         })
     }

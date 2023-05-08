@@ -5,9 +5,8 @@ import * as utils from './utils';
 
 export const createNotPDAWithProgramAsPayer = async (
   connection: web3.Connection,
-  first_not_pda: web3.Keypair,
-  // second_not_pda: web3.Keypair,
-  programAccount: web3.Keypair,
+  notPda: web3.Keypair,
+  programKeypair: web3.Keypair,
   feePayer: web3.Keypair = SIGNER
 ) => {
   let instructionNumber = 0;
@@ -19,18 +18,12 @@ export const createNotPDAWithProgramAsPayer = async (
   const instruction = new web3.TransactionInstruction({
     programId,
     keys: [
-      { pubkey: first_not_pda.publicKey, isSigner: true, isWritable: true },
-      // { pubkey: second_not_pda.publicKey, isSigner: true, isWritable: true },
+      { pubkey: notPda.publicKey, isSigner: true, isWritable: true },
       {
-        pubkey: programAccount.publicKey,
+        pubkey: programKeypair.publicKey,
         isSigner: true,
         isWritable: true,
       },
-      // {
-      //   pubkey: secondCreationPayer.publicKey,
-      //   isSigner: true,
-      //   isWritable: true,
-      // },
       {
         pubkey: web3.SystemProgram.programId,
         isSigner: false,
@@ -43,12 +36,45 @@ export const createNotPDAWithProgramAsPayer = async (
   let txReceipt = await web3.sendAndConfirmTransaction(
     connection,
     new web3.Transaction().add(instruction),
-    [
-      feePayer,
-      programAccount,
-      first_not_pda,
-      // second_not_pda,
-    ]
+    [feePayer, programKeypair, notPda]
+  );
+  return txReceipt;
+};
+
+export const createPDAWithProgramAsPayer = async (
+  connection: web3.Connection,
+  pda: web3.PublicKey,
+  programKeypair: web3.Keypair,
+  feePayer: web3.Keypair = SIGNER
+) => {
+  let instructionNumber = 1;
+
+  let dataBuffer = Buffer.from('');
+
+  dataBuffer = utils.packUInt8(dataBuffer, instructionNumber);
+
+  const instruction = new web3.TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: pda, isSigner: false, isWritable: true },
+      {
+        pubkey: programKeypair.publicKey,
+        isSigner: true,
+        isWritable: true,
+      },
+      {
+        pubkey: web3.SystemProgram.programId,
+        isSigner: false,
+        isWritable: true,
+      },
+    ],
+    data: dataBuffer,
+  });
+
+  let txReceipt = await web3.sendAndConfirmTransaction(
+    connection,
+    new web3.Transaction().add(instruction),
+    [feePayer, programKeypair]
   );
   return txReceipt;
 };

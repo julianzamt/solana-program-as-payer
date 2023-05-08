@@ -8,6 +8,7 @@
     "baseUrl": "",
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {},
 
     "sourceMap": true,
